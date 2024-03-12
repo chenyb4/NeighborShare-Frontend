@@ -50,11 +50,27 @@ class _HomeState extends State<Home> {
               return ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
+                  // Determine text and color based on isAvailable
+                  String availabilityText = snapshot.data![index].isAvailable ? "Available" : "Unavailable";
+                  Color availabilityColor = snapshot.data![index].isAvailable ? Colors.green : Colors.red;
+
                   return Column(
                     children: [
                       ListTile(
                         title: Text(snapshot.data![index].name),
-                        subtitle: Text(snapshot.data![index].description),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(snapshot.data![index].description),
+                            Text(
+                              availabilityText,
+                              style: TextStyle(
+                                color: availabilityColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                         tileColor: Colors.amberAccent,
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
