@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import 'item_details.dart';
+
 Future<List<Item>> fetchItems() async {
   final response = await http.get(Uri.parse('http://localhost:3000/items'));
   if (response.statusCode == 200) {
@@ -57,6 +59,14 @@ class _HomeState extends State<Home> {
                   return Column(
                     children: [
                       ListTile(
+                        onTap: (){
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ItemDetails(item: snapshot.data![index]),
+                            ),
+                          );
+                        },
                         title: Text(snapshot.data![index].name),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
