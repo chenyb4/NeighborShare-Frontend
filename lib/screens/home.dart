@@ -1,10 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';
-
 import 'package:aad_hybrid/models/Item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
 import 'package:http/http.dart' as http;
 
 Future<List<Item>> fetchItems() async {
@@ -18,7 +15,7 @@ Future<List<Item>> fetchItems() async {
   }
 }
 
-class Home extends StatefulWidget{
+class Home extends StatefulWidget {
   @override
   _HomeState createState()=>_HomeState();
 }
@@ -55,12 +52,18 @@ class _HomeState extends State<Home> {
                 itemBuilder: (context, index) {
                   return Column(
                     children: [
-                       ListTile(
-                         title: Text(snapshot.data![index].name),
-                         subtitle: Text(snapshot.data![index].description),
-                         tileColor: Colors.amberAccent,
-                          // You can add more widgets here to display additional item information
-                       ),
+                      ListTile(
+                        title: Text(snapshot.data![index].name),
+                        subtitle: Text(snapshot.data![index].description),
+                        tileColor: Colors.amberAccent,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.location_on),
+                            Text(snapshot.data![index].apartmentNumber),
+                          ],
+                        ),
+                      ),
                       const Divider(
                         height: 1,
                         thickness: 1,
