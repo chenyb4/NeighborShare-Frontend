@@ -155,7 +155,32 @@ class _MyItemsState extends State<MyItems> {
                             IconButton(
                               icon: Icon(Icons.delete),
                               onPressed: () {
-                                _deleteItem(item.id);
+                                // Show confirmation dialog before deleting the item
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: Text('Confirm Deletion'),
+                                    content: Text(
+                                        'Are you sure you want to delete ${item.name}?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          // Close the dialog
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('No'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          // Delete the item and close the dialog
+                                          _deleteItem(item.id);
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: Text('Yes'),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               },
                             ),
                           ],
