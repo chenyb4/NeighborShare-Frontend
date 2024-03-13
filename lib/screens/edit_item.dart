@@ -44,32 +44,57 @@ class _EditItemState extends State<EditItem> {
           children: [
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
-            ),
-            TextField(
-              controller: _apartmentNumberController,
-              decoration: InputDecoration(labelText: 'Apartment Number'),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Item Name',
+              ),
             ),
             SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Update item and navigate back
-                Item updatedItem = Item(
-                  id: widget.item.id,
-                  name: _nameController.text,
-                  description: _descriptionController.text,
-                  ownerEmail: widget.item.ownerEmail,
-                  apartmentNumber: _apartmentNumberController.text,
-                  isAvailable: widget.item.isAvailable,
-                );
-                // Call function to update item
-                _updateItem(updatedItem);
-              },
-              child: Text('Save Changes'),
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Description',
+              ),
+              maxLines: 4, // Adjust the max lines for larger text field
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _apartmentNumberController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Apartment Number',
+              ),
+            ),
+            SizedBox(height: 32),
+            Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Update item and navigate back
+                    Item updatedItem = Item(
+                      id: widget.item.id,
+                      name: _nameController.text,
+                      description: _descriptionController.text,
+                      ownerEmail: widget.item.ownerEmail,
+                      apartmentNumber: _apartmentNumberController.text,
+                      isAvailable: widget.item.isAvailable,
+                    );
+                    // Call function to update item
+                    _updateItem(updatedItem);
+                  },
+                  child: Text(
+                      'Save Changes',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: themeColorShade1, // Button background color
+                    elevation: 3, // Shadow elevation
+                  ),
+                ),
+              ),
             ),
           ],
         ),
