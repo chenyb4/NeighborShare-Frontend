@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:aad_hybrid/data/data.dart';
-import 'package:aad_hybrid/screens/my_items.dart';
 import 'package:aad_hybrid/utils/backend_address.dart';
 import 'package:aad_hybrid/utils/colors.dart';
 import 'package:flutter/material.dart';
@@ -10,12 +9,12 @@ import '../models/Item.dart';
 import 'edit_item.dart';
 import 'item_details.dart';
 
-class Home extends StatefulWidget {
+class MyItems extends StatefulWidget {
   @override
-  _HomeState createState() => _HomeState();
+  _MyItemsState createState() => _MyItemsState();
 }
 
-class _HomeState extends State<Home> {
+class _MyItemsState extends State<MyItems> {
   late Future<List<Item>> futureItems;
   late String myEmail; // Declare a variable to store your email address
 
@@ -31,7 +30,7 @@ class _HomeState extends State<Home> {
     if (response.statusCode == 200) {
       Iterable jsonResponse = jsonDecode(response.body);
       List<Item> items =
-          jsonResponse.map((item) => Item.fromJson(item)).toList();
+      jsonResponse.map((item) => Item.fromJson(item)).toList();
       return items;
     } else {
       throw Exception('Failed to load items');
@@ -39,7 +38,8 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _deleteItem(String itemId) async {
-    final response = await http.delete(Uri.parse(baseUrl + '/items/$itemId'));
+    final response =
+    await http.delete(Uri.parse(baseUrl + '/items/$itemId'));
     if (response.statusCode == 200) {
       setState(() {
         futureItems = fetchItems(); // Refresh the list of items
@@ -69,41 +69,9 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("NeighborShare"),
+        title: const Text("My Items"),
         centerTitle: true,
-        backgroundColor: Colors.orange,
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: themeColorShade1,
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text('My Items'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyItems(),
-                  ),
-                );
-                // You can add functionality to navigate to the Settings screen if needed
-              },
-            ),
-            // Add more ListTile widgets for other screens/options as needed
-          ],
-        ),
+        backgroundColor: themeColorShade1,
       ),
       body: Center(
         child: FutureBuilder<List<Item>>(
@@ -114,12 +82,14 @@ class _HomeState extends State<Home> {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
+              // Filter items based on owner email
+              List<Item> myItems = snapshot.data!
+                  .where((item) => item.ownerEmail == myEmail)
+                  .toList();
               return ListView.builder(
-                itemCount: snapshot.data!.length,
+                itemCount: myItems.length,
                 itemBuilder: (context, index) {
-                  Item item = snapshot.data![index];
-                  bool isMyItem = item.ownerEmail == myEmail;
-
+                  Item item = myItems[index];
                   return Column(
                     children: [
                       ListTile(
@@ -153,45 +123,43 @@ class _HomeState extends State<Home> {
                             ),
                           ],
                         ),
-                        tileColor: Colors.amberAccent,
-                        trailing: isMyItem
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Switch(
-                                    value: item.isAvailable,
-                                    onChanged: (value) {
-                                      // Toggle item availability
-                                      _toggleItemAvailability(item);
-                                    },
+                        tileColor: themeColorShade2,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Switch(
+                              value: item.isAvailable,
+                              onChanged: (value) {
+                                // Toggle item availability
+                                _toggleItemAvailability(item);
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.edit),
+                              onPressed: () {
+                                // Navigate to edit item screen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        EditItem(item: item),
                                   ),
-                                  IconButton(
-                                    icon: Icon(Icons.edit),
-                                    onPressed: () {
-                                      // Navigate to edit item screen
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditItem(item: item),
-                                        ),
-                                      ).then((value) {
-                                        setState(() {
-                                          // Update state or call a function to refresh the screen
-                                          futureItems = fetchItems();
-                                        });
-                                      });
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete),
-                                    onPressed: () {
-                                      _deleteItem(item.id);
-                                    },
-                                  ),
-                                ],
-                              )
-                            : null,
+                                ).then((value) {
+                                  setState(() {
+                                    // Update state or call a function to refresh the screen
+                                    futureItems = fetchItems();
+                                  });
+                                });
+                              },
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete),
+                              onPressed: () {
+                                _deleteItem(item.id);
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                       const Divider(
                         height: 1,
