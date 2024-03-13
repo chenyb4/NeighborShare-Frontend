@@ -114,12 +114,14 @@ class _HomeState extends State<Home> {
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (snapshot.hasData) {
+              // Filter items based on owner email
+              List<Item> myItems = snapshot.data!
+                  .where((item) => item.ownerEmail != myEmail)
+                  .toList();
               return ListView.builder(
-                itemCount: snapshot.data!.length,
+                itemCount: myItems.length,
                 itemBuilder: (context, index) {
-                  Item item = snapshot.data![index];
-                  bool isMyItem = item.ownerEmail == myEmail;
-
+                  Item item = myItems[index];
                   return Column(
                     children: [
                       ListTile(
@@ -153,45 +155,8 @@ class _HomeState extends State<Home> {
                             ),
                           ],
                         ),
-                        tileColor: Colors.amberAccent,
-                        trailing: isMyItem
-                            ? Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Switch(
-                                    value: item.isAvailable,
-                                    onChanged: (value) {
-                                      // Toggle item availability
-                                      _toggleItemAvailability(item);
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.edit),
-                                    onPressed: () {
-                                      // Navigate to edit item screen
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditItem(item: item),
-                                        ),
-                                      ).then((value) {
-                                        setState(() {
-                                          // Update state or call a function to refresh the screen
-                                          futureItems = fetchItems();
-                                        });
-                                      });
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete),
-                                    onPressed: () {
-                                      _deleteItem(item.id);
-                                    },
-                                  ),
-                                ],
-                              )
-                            : null,
+                        tileColor: themeColorShade2,
+
                       ),
                       const Divider(
                         height: 1,
