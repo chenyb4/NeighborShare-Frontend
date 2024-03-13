@@ -146,7 +146,10 @@ class _HomeState extends State<Home> {
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(item.name),
+                              Text(
+                                  item.name,
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                               Row(
                                 children: [
                                   Icon(Icons.location_on),

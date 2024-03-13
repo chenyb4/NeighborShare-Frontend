@@ -65,6 +65,12 @@ class _MyItemsState extends State<MyItems> {
     }
   }
 
+  Future<void> _refreshItems() async {
+    setState(() {
+      futureItems = fetchItems(); // Refresh the list of items
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -73,132 +79,138 @@ class _MyItemsState extends State<MyItems> {
         centerTitle: true,
         backgroundColor: themeColorShade1,
       ),
-      body: Center(
-        child: FutureBuilder<List<Item>>(
-          future: futureItems,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData) {
-              // Filter items based on owner email
-              List<Item> myItems = snapshot.data!
-                  .where((item) => item.ownerEmail == myEmail)
-                  .toList();
-              return ListView.builder(
-                itemCount: myItems.length,
-                itemBuilder: (context, index) {
-                  Item item = myItems[index];
-                  return Column(
-                    children: [
-                      ListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ItemDetails(item: item),
-                            ),
-                          );
-                        },
-                        title: Text(item.name),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.description),
-                            Row(
-                              children: [
-                                Icon(Icons.location_on),
-                                Text(item.apartmentNumber),
-                              ],
-                            ),
-                            Text(
-                              item.isAvailable ? "Available" : "Unavailable",
-                              style: TextStyle(
-                                color: item.isAvailable
-                                    ? Colors.green
-                                    : Colors.red,
-                                fontWeight: FontWeight.bold,
+      body: RefreshIndicator(
+        onRefresh: _refreshItems,
+        child: Center(
+          child: FutureBuilder<List<Item>>(
+            future: futureItems,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                // Filter items based on owner email
+                List<Item> myItems = snapshot.data!
+                    .where((item) => item.ownerEmail == myEmail)
+                    .toList();
+                return ListView.builder(
+                  itemCount: myItems.length,
+                  itemBuilder: (context, index) {
+                    Item item = myItems[index];
+                    return Column(
+                      children: [
+                        ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ItemDetails(item: item),
                               ),
-                            ),
-                          ],
-                        ),
-                        tileColor: themeColorShade2,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Switch(
-                              value: item.isAvailable,
-                              onChanged: (value) {
-                                // Toggle item availability
-                                _toggleItemAvailability(item);
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.edit),
-                              onPressed: () {
-                                // Navigate to edit item screen
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        EditItem(item: item),
-                                  ),
-                                ).then((value) {
-                                  setState(() {
-                                    // Update state or call a function to refresh the screen
-                                    futureItems = fetchItems();
+                            );
+                          },
+                          title: Text(
+                              item.name,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.description),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on),
+                                  Text(item.apartmentNumber),
+                                ],
+                              ),
+                              Text(
+                                item.isAvailable ? "Available" : "Unavailable",
+                                style: TextStyle(
+                                  color: item.isAvailable
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          tileColor: themeColorShade2,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Switch(
+                                value: item.isAvailable,
+                                onChanged: (value) {
+                                  // Toggle item availability
+                                  _toggleItemAvailability(item);
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () {
+                                  // Navigate to edit item screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          EditItem(item: item),
+                                    ),
+                                  ).then((value) {
+                                    setState(() {
+                                      // Update state or call a function to refresh the screen
+                                      futureItems = fetchItems();
+                                    });
                                   });
-                                });
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () {
-                                // Show confirmation dialog before deleting the item
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: Text('Confirm Deletion'),
-                                    content: Text(
-                                        'Are you sure you want to delete ${item.name}?'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          // Close the dialog
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('No'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          // Delete the item and close the dialog
-                                          _deleteItem(item.id);
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Text('Yes'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () {
+                                  // Show confirmation dialog before deleting the item
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      title: Text('Confirm Deletion'),
+                                      content: Text(
+                                          'Are you sure you want to delete ${item.name}?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () {
+                                            // Close the dialog
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('No'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            // Delete the item and close the dialog
+                                            _deleteItem(item.id);
+                                            Navigator.of(context).pop();
+                                          },
+                                          child: Text('Yes'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: Colors.white,
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else {
-              return Text('No data available');
-            }
-          },
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Colors.white,
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                return Text('No data available');
+              }
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
