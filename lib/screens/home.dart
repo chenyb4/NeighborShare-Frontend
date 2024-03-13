@@ -143,17 +143,22 @@ class _HomeState extends State<Home> {
                               ),
                             );
                           },
-                          title: Text(item.name),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(item.description),
+                              Text(item.name),
                               Row(
                                 children: [
                                   Icon(Icons.location_on),
                                   Text(item.apartmentNumber),
                                 ],
                               ),
+                            ],
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.description),
                               Text(
                                 item.isAvailable
                                     ? "Available"
