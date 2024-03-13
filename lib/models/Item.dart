@@ -20,4 +20,33 @@ class Item {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'ownerEmail': ownerEmail,
+      'description': description,
+      'apartmentNumber': apartmentNumber,
+      'isAvailable': isAvailable,
+    };
+  }
+
+  Item copyWith({
+    String? id,
+    String? name,
+    String? ownerEmail,
+    String? description,
+    String? apartmentNumber,
+    bool? isAvailable,
+  }) {
+    return Item(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      ownerEmail: ownerEmail ?? this.ownerEmail,
+      description: description ?? this.description,
+      apartmentNumber: apartmentNumber ?? this.apartmentNumber,
+      isAvailable: isAvailable ?? this.isAvailable,
+    );
+  }
+
 }
