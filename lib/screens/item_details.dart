@@ -1,4 +1,4 @@
-import 'package:aad_hybrid/utils/colors.dart';
+import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import '../models/Item.dart'; // Import your Item model
 

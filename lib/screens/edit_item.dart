@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../models/Item.dart';
-import '../utils/backend_address.dart';
-import '../utils/colors.dart';
+import '../configs/backend_address.dart';
+import '../configs/colors.dart';
 import 'package:http/http.dart' as http;
 
 class EditItem extends StatefulWidget {

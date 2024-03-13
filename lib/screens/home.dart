@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:aad_hybrid/data/data.dart';
 import 'package:aad_hybrid/screens/my_items.dart';
-import 'package:aad_hybrid/utils/backend_address.dart';
-import 'package:aad_hybrid/utils/colors.dart';
+import 'package:aad_hybrid/configs/backend_address.dart';
+import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -71,7 +71,7 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text("NeighborShare"),
         centerTitle: true,
-        backgroundColor: Colors.orange,
+        backgroundColor: themeColorShade1,
       ),
       drawer: Drawer(
         child: ListView(
