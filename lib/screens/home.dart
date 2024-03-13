@@ -31,7 +31,7 @@ class _HomeState extends State<Home> {
     if (response.statusCode == 200) {
       Iterable jsonResponse = jsonDecode(response.body);
       List<Item> items =
-          jsonResponse.map((item) => Item.fromJson(item)).toList();
+      jsonResponse.map((item) => Item.fromJson(item)).toList();
       return items;
     } else {
       throw Exception('Failed to load items');
@@ -106,71 +106,83 @@ class _HomeState extends State<Home> {
         ),
       ),
       body: Center(
-        child: FutureBuilder<List<Item>>(
-          future: futureItems,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else if (snapshot.hasData) {
-              // Filter items based on owner email
-              List<Item> myItems = snapshot.data!
-                  .where((item) => item.ownerEmail != myEmail)
-                  .toList();
-              return ListView.builder(
-                itemCount: myItems.length,
-                itemBuilder: (context, index) {
-                  Item item = myItems[index];
-                  return Column(
-                    children: [
-                      ListTile(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ItemDetails(item: item),
-                            ),
-                          );
-                        },
-                        title: Text(item.name),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.description),
-                            Row(
-                              children: [
-                                Icon(Icons.location_on),
-                                Text(item.apartmentNumber),
-                              ],
-                            ),
-                            Text(
-                              item.isAvailable ? "Available" : "Unavailable",
-                              style: TextStyle(
-                                color: item.isAvailable
-                                    ? Colors.green
-                                    : Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        tileColor: themeColorShade2,
-
-                      ),
-                      const Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: Colors.white,
-                      ),
-                    ],
-                  );
-                },
-              );
-            } else {
-              return Text('No data available');
-            }
+        child: RefreshIndicator(
+          // Define the refresh callback
+          onRefresh: () {
+            setState(() {
+              futureItems = fetchItems(); // Refresh the list of items
+            });
+            // Return a Future that completes when the refreshing is done
+            return futureItems;
           },
+          child: FutureBuilder<List<Item>>(
+            future: futureItems,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                // Filter items based on owner email
+                List<Item> myItems = snapshot.data!
+                    .where((item) => item.ownerEmail != myEmail)
+                    .toList();
+                return ListView.builder(
+                  itemCount: myItems.length,
+                  itemBuilder: (context, index) {
+                    Item item = myItems[index];
+                    return Column(
+                      children: [
+                        ListTile(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ItemDetails(item: item),
+                              ),
+                            );
+                          },
+                          title: Text(item.name),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.description),
+                              Row(
+                                children: [
+                                  Icon(Icons.location_on),
+                                  Text(item.apartmentNumber),
+                                ],
+                              ),
+                              Text(
+                                item.isAvailable
+                                    ? "Available"
+                                    : "Unavailable",
+                                style: TextStyle(
+                                  color: item.isAvailable
+                                      ? Colors.green
+                                      : Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          tileColor: themeColorShade2,
+                        ),
+                        const Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: Colors.white,
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                return Text('No data available');
+              }
+            },
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
