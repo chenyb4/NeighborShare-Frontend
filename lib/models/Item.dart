@@ -1,30 +1,23 @@
 class Item {
+  String id; // Define a property to store the MongoDB _id
   String name;
   String ownerEmail;
   String description;
   String apartmentNumber;
   bool isAvailable;
 
-  Item({required this.name, required this.ownerEmail, this.description = "", required this.apartmentNumber, required this.isAvailable});
+  Item({required this.id, required this.name, required this.ownerEmail, this.description = "", required this.apartmentNumber, required this.isAvailable});
 
-
+  // Factory method to create Item object from JSON data
   factory Item.fromJson(Map<String, dynamic> json) {
-    return switch(json){
-      {
-      'name': String name,
-      'ownerEmail':String ownerEmail,
-      'description': String description,
-      'apartmentNumber':String apartmentNumber,
-      'isAvailable': bool isAvailable,
-      } =>
-          Item(
-            name: name,
-            ownerEmail: ownerEmail,
-            description: description,
-            apartmentNumber:apartmentNumber,
-            isAvailable: isAvailable,
-          ),
-      _ => throw const FormatException('Failed to load item.'),
-    };
+    return Item(
+      id: json['_id'], // Assign value of _id field to id property
+      name: json['name'],
+      ownerEmail: json['ownerEmail'],
+      description: json['description'] ?? "", // Use null-aware operator to handle optional field
+      apartmentNumber: json['apartmentNumber'],
+      isAvailable: json['isAvailable'] ?? false, // Default value for boolean field
+    );
   }
+
 }

@@ -1,34 +1,49 @@
 import 'dart:convert';
+import 'package:aad_hybrid/data/data.dart';
 import 'package:aad_hybrid/models/Item.dart';
+import 'package:aad_hybrid/utils/backend_address.dart';
+import 'package:aad_hybrid/utils/colors.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../utils/helperFunctions.dart';
 import 'item_details.dart';
 
-Future<List<Item>> fetchItems() async {
-  final response = await http.get(Uri.parse('http://localhost:3000/items'));
-  if (response.statusCode == 200) {
-    Iterable jsonResponse = jsonDecode(response.body);
-    List<Item> items = jsonResponse.map((item) => Item.fromJson(item)).toList();
-    return items;
-  } else {
-    throw Exception('Failed to load items');
-  }
-}
+
 
 class Home extends StatefulWidget {
   @override
-  _HomeState createState()=>_HomeState();
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   late Future<List<Item>> futureItems;
+  late String myEmail; // Declare a variable to store your email address
 
   @override
   void initState() {
     super.initState();
+    myEmail = myDummyEmail; // Assign your email address from the data.dart file
     futureItems = fetchItems();
+  }
+
+  Future<void> _deleteItem(String itemId) async {
+    final response = await http.delete(Uri.parse(baseUrl+'/items/$itemId'));
+    if (response.statusCode == 200) {
+      // Item deleted successfully, refresh the list
+      setState(() {
+        futureItems = fetchItems(); // Refresh the list of items
+      });
+    } else {
+      // Failed to delete item
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete item'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -37,7 +52,7 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: const Text("NeighborShare"),
         centerTitle: true,
-        backgroundColor: Colors.orange,
+        backgroundColor: themeColorShade1,
       ),
       body: Center(
         child: FutureBuilder<List<Item>>(
@@ -52,9 +67,11 @@ class _HomeState extends State<Home> {
               return ListView.builder(
                 itemCount: snapshot.data!.length,
                 itemBuilder: (context, index) {
-                  // Determine text and color based on isAvailable
                   String availabilityText = snapshot.data![index].isAvailable ? "Available" : "Unavailable";
                   Color availabilityColor = snapshot.data![index].isAvailable ? Colors.green : Colors.red;
+
+                  // Check if the ownerEmail of the item matches your email
+                  bool isMyItem = snapshot.data![index].ownerEmail == myEmail;
 
                   return Column(
                     children: [
@@ -71,7 +88,13 @@ class _HomeState extends State<Home> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(snapshot.data![index].description),
+                            Text(snapshot.data![index].id),
+                            Row(
+                              children: [
+                                Icon(Icons.location_on),
+                                Text(snapshot.data![index].apartmentNumber),
+                              ],
+                            ),
                             Text(
                               availabilityText,
                               style: TextStyle(
@@ -81,14 +104,15 @@ class _HomeState extends State<Home> {
                             ),
                           ],
                         ),
-                        tileColor: Colors.amberAccent,
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.location_on),
-                            Text(snapshot.data![index].apartmentNumber),
-                          ],
-                        ),
+                        tileColor: themeColorShade2,
+                        trailing: isMyItem
+                            ? IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            _deleteItem(snapshot.data![index].id); // Pass item ID to delete function
+                          },
+                        )
+                            : null, // If it's not your item, don't show the delete icon
                       ),
                       const Divider(
                         height: 1,
@@ -107,9 +131,15 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/addItem');
+          Navigator.pushNamed(context, '/addItem')
+              .then((value) {
+            setState(() {
+              // Update state or call a function to refresh the screen
+              futureItems = fetchItems();
+            });
+          });
         },
-        backgroundColor: Colors.orange,
+        backgroundColor: themeColorShade1,
         child: Icon(Icons.add),
       ),
     );

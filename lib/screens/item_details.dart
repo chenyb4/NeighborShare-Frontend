@@ -1,3 +1,4 @@
+import 'package:aad_hybrid/utils/colors.dart';
 import 'package:flutter/material.dart';
 import '../models/Item.dart'; // Import your Item model
 
@@ -17,7 +18,7 @@ class _ItemDetailsState extends State<ItemDetails> {
       appBar: AppBar(
         title: Text(widget.item.name),
         centerTitle: true,
-        backgroundColor: Colors.orange,
+        backgroundColor: themeColorShade1,
       ),
       body: Center(
         child: Column(

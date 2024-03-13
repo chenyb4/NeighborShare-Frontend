@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:aad_hybrid/utils/backend_address.dart';
+import 'package:aad_hybrid/utils/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -45,7 +47,7 @@ class _AddItemState extends State<AddItem> {
     };
 
     final response = await http.post(
-      Uri.parse('http://localhost:3000/items/'),
+      Uri.parse(baseUrl+'/items/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -69,8 +71,8 @@ class _AddItemState extends State<AddItem> {
         _isAvailable = true;
       });
 
-      Future.delayed(Duration(milliseconds: 1500), () {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+      Future.delayed(Duration(milliseconds: 800), () {
+        Navigator.pop(context);
       });
 
     } else {
@@ -90,7 +92,7 @@ class _AddItemState extends State<AddItem> {
       appBar: AppBar(
         title: Text("Add an Item"),
         centerTitle: true,
-        backgroundColor: Colors.orangeAccent,
+        backgroundColor: themeColorShade1,
       ),
       body: Center(
         child: SizedBox(
@@ -141,7 +143,7 @@ class _AddItemState extends State<AddItem> {
                   onPressed: _addItem,
                   child: Text(
                     "Add Item",
-                    style: TextStyle(color: Colors.orange),
+                    style: TextStyle(color: themeColorShade1),
                   ),
                 ),
               ],
