@@ -14,7 +14,6 @@ class AddItem extends StatefulWidget {
 class _AddItemState extends State<AddItem> {
   late TextEditingController _partyNameController;
   late TextEditingController _descriptionController;
-
   late TextEditingController _apartmentNumberController;
 
   bool _isAvailable = true;
@@ -24,7 +23,6 @@ class _AddItemState extends State<AddItem> {
     super.initState();
     _partyNameController = TextEditingController();
     _descriptionController = TextEditingController();
-
     _apartmentNumberController = TextEditingController();
   }
 
@@ -32,7 +30,6 @@ class _AddItemState extends State<AddItem> {
   void dispose() {
     _partyNameController.dispose();
     _descriptionController.dispose();
-
     _apartmentNumberController.dispose();
     super.dispose();
   }
@@ -43,11 +40,11 @@ class _AddItemState extends State<AddItem> {
       'description': _descriptionController.text,
       'apartmentNumber': _apartmentNumberController.text,
       'isAvailable': _isAvailable,
-      'ownerEmail':'chenyb4work@outlook.com'
+      'ownerEmail': 'chenyb4work@outlook.com'
     };
 
     final response = await http.post(
-      Uri.parse(baseUrl+'/items/'),
+      Uri.parse(baseUrl + '/items/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -65,7 +62,6 @@ class _AddItemState extends State<AddItem> {
       // Clear text fields after adding the item
       _partyNameController.clear();
       _descriptionController.clear();
-
       _apartmentNumberController.clear();
       setState(() {
         _isAvailable = true;
@@ -74,7 +70,6 @@ class _AddItemState extends State<AddItem> {
       Future.delayed(Duration(milliseconds: 800), () {
         Navigator.pop(context);
       });
-
     } else {
       // Item addition failed
       ScaffoldMessenger.of(context).showSnackBar(
@@ -94,61 +89,65 @@ class _AddItemState extends State<AddItem> {
         centerTitle: true,
         backgroundColor: themeColorShade1,
       ),
-      body: Center(
-        child: SizedBox(
-          width: 250,
-          child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: Column(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(32.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _partyNameController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Item Name',
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _descriptionController,
+              maxLines: 5, // Larger text field for description
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Description',
+              ),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: _apartmentNumberController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Apartment Number',
+              ),
+            ),
+            SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextField(
-                  controller: _partyNameController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Item Name',
-                  ),
-                ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _descriptionController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Description',
-                  ),
-                ),
-                SizedBox(height: 16),
-                TextField(
-                  controller: _apartmentNumberController,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Apartment Number',
-                  ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text('Available'),
-                    Checkbox(
-                      value: _isAvailable,
-                      onChanged: (value) {
-                        setState(() {
-                          _isAvailable = value ?? false;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _addItem,
-                  child: Text(
-                    "Add Item",
-                    style: TextStyle(color: themeColorShade1),
-                  ),
+                Text('Available'),
+                Switch(
+                  value: _isAvailable,
+                  onChanged: (value) {
+                    setState(() {
+                      _isAvailable = value;
+                    });
+                  },
                 ),
               ],
             ),
-          ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _addItem,
+              style: ElevatedButton.styleFrom(
+                primary: themeColorShade1, // Background color
+                elevation: 3, // Shadow elevation
+              ),
+              child: Text(
+                "Add Item",
+                style: TextStyle(color: Colors.white), // Text color
+              ),
+            ),
+
+
+          ],
         ),
       ),
     );
