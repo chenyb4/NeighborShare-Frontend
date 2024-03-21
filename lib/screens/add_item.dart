@@ -91,7 +91,7 @@ class _AddItemState extends State<AddItem> {
       });
 
       Future.delayed(Duration(milliseconds: 800), () {
-        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/myItems');
       });
     } else {
       // Item addition failed

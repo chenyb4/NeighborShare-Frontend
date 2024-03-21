@@ -1,6 +1,7 @@
 import 'package:aad_hybrid/screens/add_item.dart';
 import 'package:aad_hybrid/screens/home.dart';
 import 'package:aad_hybrid/screens/login.dart';
+import 'package:aad_hybrid/screens/my_items.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
       home: token != null ? Home() : Login(),
       routes: {
         '/addItem': (context) => AddItem(),
-        '/login': (context) => Login(), // Define the login route
+        '/login': (context) => Login(),
+        '/myItems':(context)=> MyItems(),// Define the login route
       },
     );
   }
