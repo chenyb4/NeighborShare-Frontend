@@ -4,6 +4,7 @@ import 'package:aad_hybrid/configs/backend_address.dart';
 import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/Item.dart';
 import 'edit_item.dart';
@@ -15,18 +16,30 @@ class MyItems extends StatefulWidget {
 }
 
 class _MyItemsState extends State<MyItems> {
-  late Future<List<Item>> futureItems;
+  late Future<List<Item>> futureItems = Future.value([]);
   late String myEmail; // Declare a variable to store your email address
+  late String token;
 
   @override
   void initState() {
     super.initState();
-    myEmail = "chenyb0417@outlook.com"; // Replace with your actual email
+    fetchTokenAndItems();
+  }
+
+  Future<void> fetchTokenAndItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token') ?? '';
+    myEmail = "chenyb0417@outlook.com"; // Use email from SharedPreferences
     futureItems = fetchItems();
+    setState(() {});
   }
 
   Future<List<Item>> fetchItems() async {
-    final response = await http.get(Uri.parse(baseUrl + '/items'));
+    final response = await http.get(
+      Uri.parse(baseUrl + '/items'),
+      headers: {'Authorization': 'Bearer $token'}, // Include authorization header
+    );
+
     if (response.statusCode == 200) {
       Iterable jsonResponse = jsonDecode(response.body);
       List<Item> items =
