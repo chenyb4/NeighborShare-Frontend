@@ -60,6 +60,13 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token'); // Remove token from SharedPreferences
+    // Navigate to login screen or any other desired screen
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,6 +101,10 @@ class _HomeState extends State<Home> {
                   ),
                 );
               },
+            ),
+            ListTile(
+              title: Text('Logout'),
+              onTap: _logout, // Call logout function when tapped
             ),
           ],
         ),

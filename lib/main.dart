@@ -9,10 +9,22 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? token = prefs.getString('token');
 
-  runApp(MaterialApp(
-    home: token != null ? Home() : Login(),
-    routes: {
-      '/addItem': (context) => AddItem(),
-    },
-  ));
+  runApp(MyApp(token: token));
+}
+
+class MyApp extends StatelessWidget {
+  final String? token;
+
+  const MyApp({Key? key, this.token}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: token != null ? Home() : Login(),
+      routes: {
+        '/addItem': (context) => AddItem(),
+        '/login': (context) => Login(), // Define the login route
+      },
+    );
+  }
 }
