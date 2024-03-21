@@ -17,7 +17,7 @@ class MyItems extends StatefulWidget {
 
 class _MyItemsState extends State<MyItems> {
   late Future<List<Item>> futureItems = Future.value([]);
-  late String myEmail; // Declare a variable to store your email address
+  late String myEmail;
   late String token;
 
   @override
@@ -29,9 +29,22 @@ class _MyItemsState extends State<MyItems> {
   Future<void> fetchTokenAndItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
-    myEmail = "chenyb0417@outlook.com"; // Use email from SharedPreferences
+    myEmail = getEmailFromToken(token); // Extract email from token
     futureItems = fetchItems();
     setState(() {});
+  }
+
+  String getEmailFromToken(String token) {
+    // Decode the token
+    List<String> parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Invalid token');
+    }
+    String payload = parts[1];
+    String decodedPayload = utf8.decode(base64Url.decode(payload));
+    Map<String, dynamic> decodedPayloadMap = json.decode(decodedPayload);
+    // Extract email from the decoded payload
+    return decodedPayloadMap['email'];
   }
 
   Future<List<Item>> fetchItems() async {
@@ -42,8 +55,7 @@ class _MyItemsState extends State<MyItems> {
 
     if (response.statusCode == 200) {
       Iterable jsonResponse = jsonDecode(response.body);
-      List<Item> items =
-      jsonResponse.map((item) => Item.fromJson(item)).toList();
+      List<Item> items = jsonResponse.map((item) => Item.fromJson(item)).toList();
       return items;
     } else {
       throw Exception('Failed to load items');
