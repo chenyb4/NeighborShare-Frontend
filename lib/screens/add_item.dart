@@ -3,6 +3,7 @@ import 'package:aad_hybrid/configs/backend_address.dart';
 import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home.dart';
 
@@ -17,6 +18,7 @@ class _AddItemState extends State<AddItem> {
   late TextEditingController _apartmentNumberController;
 
   bool _isAvailable = true;
+  late String _ownerEmail = '';
 
   @override
   void initState() {
@@ -24,6 +26,7 @@ class _AddItemState extends State<AddItem> {
     _partyNameController = TextEditingController();
     _descriptionController = TextEditingController();
     _apartmentNumberController = TextEditingController();
+    _fetchOwnerEmail();
   }
 
   @override
@@ -34,13 +37,33 @@ class _AddItemState extends State<AddItem> {
     super.dispose();
   }
 
+  Future<void> _fetchOwnerEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    if (token != null) {
+      Map<String, dynamic> payload = _parseJwt(token);
+      setState(() {
+        _ownerEmail = payload['email'] ?? '';
+      });
+    }
+  }
+
+  Map<String, dynamic> _parseJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw FormatException('Invalid JWT token');
+    }
+    final payload = parts[1];
+    return jsonDecode(utf8.decode(base64Url.decode(payload)));
+  }
+
   Future<void> _addItem() async {
     final Map<String, dynamic> itemData = {
       'name': _partyNameController.text,
       'description': _descriptionController.text,
       'apartmentNumber': _apartmentNumberController.text,
       'isAvailable': _isAvailable,
-      'ownerEmail': 'chenyb4work@outlook.com'
+      'ownerEmail': _ownerEmail, // Use the ownerEmail from token payload
     };
 
     final response = await http.post(
@@ -145,8 +168,6 @@ class _AddItemState extends State<AddItem> {
                 style: TextStyle(color: Colors.white), // Text color
               ),
             ),
-
-
           ],
         ),
       ),
