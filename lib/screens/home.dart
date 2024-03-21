@@ -17,7 +17,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late Future<List<Item>> futureItems = Future.value([]);
-  late String myEmail;
+  late String myEmail = ''; // Initialize with empty string
   late String token;
 
   @override
@@ -29,9 +29,19 @@ class _HomeState extends State<Home> {
   Future<void> fetchTokenAndItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
-    myEmail = myDummyEmail; // Replace with your actual email
+    Map<String, dynamic> payload = _parseJwt(token); // Parse JWT token payload
+    myEmail = payload['email'] ?? ''; // Extract email from payload
     futureItems = fetchItems();
     setState(() {});
+  }
+
+  Map<String, dynamic> _parseJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw FormatException('Invalid JWT token');
+    }
+    final payload = parts[1];
+    return jsonDecode(utf8.decode(base64Url.decode(payload)));
   }
 
   Future<List<Item>> fetchItems() async {

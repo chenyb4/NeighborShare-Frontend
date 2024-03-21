@@ -21,7 +21,7 @@ class _MyItemsState extends State<MyItems> {
   @override
   void initState() {
     super.initState();
-    myEmail = myDummyEmail; // Replace with your actual email
+    myEmail = "chenyb0417@outlook.com"; // Replace with your actual email
     futureItems = fetchItems();
   }
 
