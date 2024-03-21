@@ -61,10 +61,36 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token'); // Remove token from SharedPreferences
-    // Navigate to login screen or any other desired screen
-    Navigator.pushReplacementNamed(context, '/login');
+    bool confirmLogout = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Logout'),
+          content: Text('Are you sure you want to logout?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return false when cancel is pressed
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return true when logout is confirmed
+              },
+              child: Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmLogout == true) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token'); // Remove token from SharedPreferences
+      // Navigate to login screen or any other desired screen
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override
