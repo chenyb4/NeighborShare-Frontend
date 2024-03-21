@@ -1,14 +1,14 @@
 import 'dart:convert';
-import 'package:aad_hybrid/data/data.dart';
-import 'package:aad_hybrid/screens/my_items.dart';
-import 'package:aad_hybrid/configs/backend_address.dart';
-import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../data/data.dart';
 import '../models/Item.dart';
-import 'edit_item.dart';
 import 'item_details.dart';
+import 'my_items.dart';
+import 'package:aad_hybrid/configs/colors.dart';
+import 'package:aad_hybrid/screens/add_item.dart';
+import 'package:aad_hybrid/configs/backend_address.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -16,18 +16,30 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  late Future<List<Item>> futureItems;
-  late String myEmail; // Declare a variable to store your email address
+  late Future<List<Item>> futureItems = Future.value([]);
+  late String myEmail;
+  late String token;
 
   @override
   void initState() {
     super.initState();
+    fetchTokenAndItems();
+  }
+
+  Future<void> fetchTokenAndItems() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('token') ?? '';
     myEmail = myDummyEmail; // Replace with your actual email
     futureItems = fetchItems();
+    setState(() {});
   }
 
   Future<List<Item>> fetchItems() async {
-    final response = await http.get(Uri.parse(baseUrl + '/items'));
+    final response = await http.get(
+      Uri.parse(baseUrl + '/items'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
     if (response.statusCode == 200) {
       Iterable jsonResponse = jsonDecode(response.body);
       List<Item> items =
@@ -35,33 +47,6 @@ class _HomeState extends State<Home> {
       return items;
     } else {
       throw Exception('Failed to load items');
-    }
-  }
-
-  Future<void> _deleteItem(String itemId) async {
-    final response = await http.delete(Uri.parse(baseUrl + '/items/$itemId'));
-    if (response.statusCode == 200) {
-      setState(() {
-        futureItems = fetchItems(); // Refresh the list of items
-      });
-    } else {
-      throw Exception('Failed to delete item');
-    }
-  }
-
-  Future<void> _toggleItemAvailability(Item item) async {
-    Item updatedItem = item.copyWith(isAvailable: !item.isAvailable);
-    final response = await http.put(
-      Uri.parse(baseUrl + '/items/${item.id}'),
-      body: jsonEncode(updatedItem.toJson()),
-      headers: {'Content-Type': 'application/json'},
-    );
-    if (response.statusCode == 200) {
-      setState(() {
-        futureItems = fetchItems(); // Refresh the list of items
-      });
-    } else {
-      throw Exception('Failed to toggle item availability');
     }
   }
 
@@ -98,21 +83,17 @@ class _HomeState extends State<Home> {
                     builder: (context) => MyItems(),
                   ),
                 );
-                // You can add functionality to navigate to the Settings screen if needed
               },
             ),
-            // Add more ListTile widgets for other screens/options as needed
           ],
         ),
       ),
       body: Center(
         child: RefreshIndicator(
-          // Define the refresh callback
           onRefresh: () {
             setState(() {
-              futureItems = fetchItems(); // Refresh the list of items
+              futureItems = fetchItems();
             });
-            // Return a Future that completes when the refreshing is done
             return futureItems;
           },
           child: FutureBuilder<List<Item>>(
@@ -123,7 +104,6 @@ class _HomeState extends State<Home> {
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else if (snapshot.hasData) {
-                // Filter items based on owner email
                 List<Item> myItems = snapshot.data!
                     .where((item) => item.ownerEmail != myEmail)
                     .toList();
@@ -147,8 +127,8 @@ class _HomeState extends State<Home> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                  item.name,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                item.name,
+                                style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               Row(
                                 children: [
@@ -197,7 +177,6 @@ class _HomeState extends State<Home> {
         onPressed: () {
           Navigator.pushNamed(context, '/addItem').then((value) {
             setState(() {
-              // Update state or call a function to refresh the screen
               futureItems = fetchItems();
             });
           });
