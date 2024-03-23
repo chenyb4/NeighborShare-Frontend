@@ -7,6 +7,7 @@ import '../models/Item.dart';
 import '../configs/backend_address.dart';
 import '../configs/colors.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
 
 class EditItem extends StatefulWidget {
   final Item item;
@@ -21,6 +22,7 @@ class _EditItemState extends State<EditItem> {
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   late TextEditingController _apartmentNumberController;
+  late String? _token; // Declare token variable
 
   @override
   void initState() {
@@ -28,6 +30,7 @@ class _EditItemState extends State<EditItem> {
     _nameController = TextEditingController(text: widget.item.name);
     _descriptionController = TextEditingController(text: widget.item.description);
     _apartmentNumberController = TextEditingController(text: widget.item.apartmentNumber);
+    _getToken();
   }
 
   @override
@@ -86,7 +89,7 @@ class _EditItemState extends State<EditItem> {
                     _updateItem(updatedItem);
                   },
                   child: Text(
-                      'Save Changes',
+                    'Save Changes',
                     style: TextStyle(color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
@@ -102,12 +105,20 @@ class _EditItemState extends State<EditItem> {
     );
   }
 
+  Future<void> _getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString('token'); // Fetch token from SharedPreferences
+  }
+
   void _updateItem(Item item) async {
     // Send request to update item
     final response = await http.put(
       Uri.parse(baseUrl+'/items/${item.id}'),
       body: jsonEncode(item.toJson()),
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_token', // Add authorization header with token
+      },
     );
     if (response.statusCode == 200) {
       // Item updated successfully
