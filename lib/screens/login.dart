@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:aad_hybrid/screens/enrol_or_create.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,11 +25,6 @@ class Login extends StatelessWidget {
       headers: {'Content-Type': 'application/json'},
     );
 
-    
-    log(response.statusCode);
-
-
-
     if (response.statusCode == 202) {
       final Map<String, dynamic> responseData = jsonDecode(response.body);
       final String? token = responseData['token'];
@@ -37,19 +33,39 @@ class Login extends StatelessWidget {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
 
-        // Navigate to Home screen or any other screen
-        // You can replace Home() with the appropriate screen
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+        // Check if the user has an apartment_id member
+        final userDataResponse = await http.get(
+          Uri.parse(baseUrl + '/users'),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+
+        if (userDataResponse.statusCode == 200) {
+          final userData = jsonDecode(userDataResponse.body);
+          final user = userData.firstWhere(
+                (user) => user['email'] == email,
+            orElse: () => null,
+          );
+          if (user != null && user['apartment_id'] != null) {
+            // User has an apartment_id, navigate to Home screen
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
+          } else {
+            // User does not have an apartment_id, navigate to enrol_or_create screen
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EnrolOrCreate()));
+          }
+        } else {
+          // Failed to fetch user data, show error message
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('Failed to fetch user data'),
+          ));
+        }
       } else {
         // Token not found in response, handle error
-        // For now, just display a generic error message
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Invalid response format from server'),
         ));
       }
     } else {
       // HTTP request failed, handle error
-      // For now, just display a generic error message
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Failed to login. Please try again later.'),
       ));
