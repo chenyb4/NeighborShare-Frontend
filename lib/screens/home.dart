@@ -179,8 +179,8 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: Colors.blue, // You can customize the color as needed
-              padding: EdgeInsets.symmetric(vertical: 8.0),
+              color: Colors.deepPurpleAccent,
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: FutureBuilder<String>(
                 future: _fetchApartmentName(),
                 builder: (context, snapshot) {
@@ -189,14 +189,22 @@ class _HomeState extends State<Home> {
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else if (snapshot.hasData) {
-                    return Center(
-                      child: Text(
-                        'Apartment: ${snapshot.data}',
-                        style: TextStyle(
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.location_on,
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          '${snapshot.data}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     );
                   } else {
                     return SizedBox.shrink(); // Hide the banner if no data is available
