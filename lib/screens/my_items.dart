@@ -63,8 +63,16 @@ class _MyItemsState extends State<MyItems> {
   }
 
   Future<void> _deleteItem(String itemId) async {
-    final response =
-    await http.delete(Uri.parse(baseUrl + '/items/$itemId'));
+    if (token == null) {
+      // Handle case where token is null (not logged in)
+      throw Exception('Token not found');
+    }
+
+    final response = await http.delete(
+      Uri.parse(baseUrl + '/items/$itemId'),
+      headers: {'Authorization': 'Bearer $token'}, // Add authorization header with token
+    );
+
     if (response.statusCode == 200) {
       setState(() {
         futureItems = fetchItems(); // Refresh the list of items
