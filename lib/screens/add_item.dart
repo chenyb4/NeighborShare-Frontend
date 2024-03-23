@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'package:aad_hybrid/configs/backend_address.dart';
-import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'package:aad_hybrid/configs/backend_address.dart'; // Import backend address
+import 'package:aad_hybrid/screens/home.dart';
 
-import 'home.dart';
+import '../configs/colors.dart'; // Import home screen
 
 class AddItem extends StatefulWidget {
   @override
@@ -19,6 +19,7 @@ class _AddItemState extends State<AddItem> {
 
   bool _isAvailable = true;
   late String _ownerEmail = '';
+  late String? _token; // Declare token variable
 
   @override
   void initState() {
@@ -39,9 +40,9 @@ class _AddItemState extends State<AddItem> {
 
   Future<void> _fetchOwnerEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    if (token != null) {
-      Map<String, dynamic> payload = _parseJwt(token);
+    _token = prefs.getString('token'); // Fetch token from SharedPreferences
+    if (_token != null) {
+      Map<String, dynamic> payload = _parseJwt(_token!);
       setState(() {
         _ownerEmail = payload['email'] ?? '';
       });
@@ -66,10 +67,22 @@ class _AddItemState extends State<AddItem> {
       'ownerEmail': _ownerEmail, // Use the ownerEmail from token payload
     };
 
+    if (_token == null) {
+      // Handle case where token is null (not logged in)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please log in to add an item'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return; // Exit function early
+    }
+
     final response = await http.post(
       Uri.parse(baseUrl + '/items/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $_token', // Add authorization header with token
       },
       body: jsonEncode(itemData),
     );
