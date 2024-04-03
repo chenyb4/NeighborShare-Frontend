@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -235,15 +236,30 @@ class _HomeState extends State<Home> {
                         itemCount: myItems.length,
                         itemBuilder: (context, index) {
                           Item item = myItems[index];
+                          // Decode image data from base64 string
+                          Uint8List? imageBytes = item.imageData != null
+                              ? Uint8List.fromList(item.imageData!)
+                              : null;
                           return Column(
                             children: [
                               ListTile(
+                                leading: imageBytes != null
+                                    ? Image.memory(
+                                  imageBytes,
+                                  width: 50,
+                                  height: 50,
+                                  fit: BoxFit.cover,
+                                )
+                                    : SizedBox(
+                                  width: 50,
+                                  height: 50,
+                                  child: Placeholder(), // Placeholder if no image available
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          ItemDetails(item: item),
+                                      builder: (context) => ItemDetails(item: item),
                                     ),
                                   );
                                 },
@@ -267,13 +283,9 @@ class _HomeState extends State<Home> {
                                   children: [
                                     Text(item.description),
                                     Text(
-                                      item.isAvailable
-                                          ? "Available"
-                                          : "Unavailable",
+                                      item.isAvailable ? "Available" : "Unavailable",
                                       style: TextStyle(
-                                        color: item.isAvailable
-                                            ? Colors.green
-                                            : Colors.red,
+                                        color: item.isAvailable ? Colors.green : Colors.red,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),

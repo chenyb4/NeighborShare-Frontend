@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../models/Item.dart'; // Import your Item model
 import '../configs/colors.dart';
@@ -9,6 +11,11 @@ class ItemDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Decode image data from base64 string
+    Uint8List? imageBytes = item.imageData != null
+        ? Uint8List.fromList(item.imageData!)
+        : null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(item.name),
@@ -20,6 +27,16 @@ class ItemDetails extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (imageBytes != null)
+              Container(
+                width: double.infinity,
+                height: 200,
+                child: Image.memory(
+                  imageBytes,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            SizedBox(height: 20),
             _buildDetailRow('Description', item.description),
             SizedBox(height: 20),
             _buildDetailRow('Owner Email', item.ownerEmail),
@@ -27,9 +44,10 @@ class ItemDetails extends StatelessWidget {
             _buildDetailRow('Apartment Number', item.apartmentNumber),
             SizedBox(height: 20),
             _buildDetailRow(
-                'Availability',
-                item.isAvailable ? 'Available' : 'Unavailable',
-                isLast: true),
+              'Availability',
+              item.isAvailable ? 'Available' : 'Unavailable',
+              isLast: true,
+            ),
           ],
         ),
       ),

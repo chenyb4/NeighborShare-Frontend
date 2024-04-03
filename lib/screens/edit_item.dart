@@ -83,7 +83,7 @@ class _EditItemState extends State<EditItem> {
                       description: _descriptionController.text,
                       ownerEmail: widget.item.ownerEmail,
                       apartmentNumber: _apartmentNumberController.text,
-                      isAvailable: widget.item.isAvailable,
+                      isAvailable: widget.item.isAvailable, imageData: [],
                     );
                     // Call function to update item
                     _updateItem(updatedItem);

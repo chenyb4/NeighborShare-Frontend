@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:aad_hybrid/data/data.dart';
 import 'package:aad_hybrid/configs/backend_address.dart';
 import 'package:aad_hybrid/configs/colors.dart';
@@ -89,7 +90,7 @@ class _MyItemsState extends State<MyItems> {
       throw Exception('Token not found');
     }
 
-    Item updatedItem = item.copyWith(isAvailable: !item.isAvailable);
+    Item updatedItem = item.copyWith(isAvailable: !item.isAvailable, imageData: []);
     final response = await http.put(
       Uri.parse(baseUrl + '/items/${item.id}'),
       body: jsonEncode(updatedItem.toJson()),
@@ -140,6 +141,13 @@ class _MyItemsState extends State<MyItems> {
                   itemCount: myItems.length,
                   itemBuilder: (context, index) {
                     Item item = myItems[index];
+                    // Decode image data from base64 string
+                    Uint8List? imageBytes = item.imageData != null
+                        ? Uint8List.fromList(item.imageData!)
+                        : null;
+
+
+
                     return Column(
                       children: [
                         ListTile(
@@ -175,6 +183,18 @@ class _MyItemsState extends State<MyItems> {
                                 ),
                               ),
                             ],
+                          ),
+                          leading: imageBytes != null
+                              ? Image.memory(
+                            imageBytes,
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                          )
+                              : SizedBox(
+                            width: 50,
+                            height: 50,
+                            child: Placeholder(), // Placeholder if no image available
                           ),
                           tileColor: themeColorShade2,
                           trailing: Row(
