@@ -5,7 +5,7 @@ class Item {
   String description;
   String apartmentNumber;
   bool isAvailable;
-  List<int>? imageData; // Update to list of bytes
+  List<int>? imageData;
 
   Item({
     required this.id,
@@ -14,11 +14,10 @@ class Item {
     this.description = "",
     required this.apartmentNumber,
     required this.isAvailable,
-    this.imageData, // Update to accept list of bytes
+    this.imageData,
   });
 
   factory Item.fromJson(Map<String, dynamic> json) {
-    // Parse imageData from the data array
     List<int>? imageData = (json['imageData'] != null)
         ? List<int>.from(json['imageData']['data'])
         : null;
@@ -35,7 +34,6 @@ class Item {
   }
 
   Map<String, dynamic> toJson() {
-    // Convert imageData back to a JSON structure compatible with MongoDB
     Map<String, dynamic>? imageDataJson;
     if (imageData != null) {
       imageDataJson = {'type': 'Buffer', 'data': imageData};
@@ -48,7 +46,7 @@ class Item {
       'description': description,
       'apartmentNumber': apartmentNumber,
       'isAvailable': isAvailable,
-      'imageData': imageDataJson, // Include imageData in the JSON output
+      'imageData': imageDataJson,
     };
   }
 

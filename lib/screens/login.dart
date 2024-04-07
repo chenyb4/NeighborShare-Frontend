@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:aad_hybrid/screens/enrol_or_create.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aad_hybrid/screens/register.dart';
 import 'package:aad_hybrid/configs/colors.dart';
-
 import '../configs/backend_address.dart';
 import 'home.dart';
 
@@ -29,11 +27,9 @@ class Login extends StatelessWidget {
       final Map<String, dynamic> responseData = jsonDecode(response.body);
       final String? token = responseData['token'];
       if (token != null) {
-        // Store token using SharedPreferences
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
 
-        // Check if the user has an apartment_id member
         final userDataResponse = await http.get(
           Uri.parse(baseUrl + '/users'),
           headers: {'Authorization': 'Bearer $token'},
@@ -46,26 +42,21 @@ class Login extends StatelessWidget {
             orElse: () => null,
           );
           if (user != null && user['apartment_id'] != null) {
-            // User has an apartment_id, navigate to Home screen
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Home()));
           } else {
-            // User does not have an apartment_id, navigate to enrol_or_create screen
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EnrolOrCreate()));
           }
         } else {
-          // Failed to fetch user data, show error message
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text('Failed to fetch user data'),
           ));
         }
       } else {
-        // Token not found in response, handle error
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Invalid response format from server'),
         ));
       }
     } else {
-      // HTTP request failed, handle error
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text('Failed to login. Please try again later.'),
       ));

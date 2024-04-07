@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:aad_hybrid/screens/enrol_apartment.dart';
 import 'package:aad_hybrid/screens/create_apartment.dart';
-import 'package:aad_hybrid/screens/login.dart'; // Import login screen
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
+import 'package:aad_hybrid/screens/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EnrolOrCreate extends StatelessWidget {
   Future<void> _logout(BuildContext context) async {
-    // Clear token from SharedPreferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
-    // Navigate to login screen
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => Login()),
@@ -48,7 +46,7 @@ class EnrolOrCreate extends StatelessWidget {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                _logout(context); // Call logout function when button is pressed
+                _logout(context);
               },
               child: Text('Logout'),
             ),

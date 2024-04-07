@@ -1,7 +1,7 @@
-import 'dart:convert';
+
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import '../models/Item.dart'; // Import your Item model
+import '../models/Item.dart';
 import '../configs/colors.dart';
 
 class ItemDetails extends StatelessWidget {
@@ -11,7 +11,6 @@ class ItemDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Decode image data from base64 string
     Uint8List? imageBytes = item.imageData != null
         ? Uint8List.fromList(item.imageData!)
         : null;

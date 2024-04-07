@@ -16,7 +16,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late Future<List<Item>> futureItems = Future.value([]);
-  late String myEmail = ''; // Initialize with empty string
+  late String myEmail = '';
   late String token;
 
   @override
@@ -28,8 +28,8 @@ class _HomeState extends State<Home> {
   Future<void> fetchTokenAndItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
-    Map<String, dynamic> payload = _parseJwt(token); // Parse JWT token payload
-    myEmail = payload['email'] ?? ''; // Extract email from payload
+    Map<String, dynamic> payload = _parseJwt(token);
+    myEmail = payload['email'] ?? '';
     futureItems = fetchItems();
     setState(() {});
   }
@@ -74,7 +74,7 @@ class _HomeState extends State<Home> {
       if (userResponse.statusCode == 200) {
         List<dynamic> users = jsonDecode(userResponse.body);
         if (users.isNotEmpty) {
-          dynamic apartmentId = users[0]['apartment_id']; // Change apartmentId type to dynamic
+          dynamic apartmentId = users[0]['apartment_id'];
           final apartmentResponse = await http.get(
             Uri.parse(baseUrl + '/apartments/$apartmentId'),
             headers: {'Authorization': 'Bearer $token'},
@@ -110,13 +110,13 @@ class _HomeState extends State<Home> {
           actions: <Widget>[
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); // Return false when cancel is pressed
+                Navigator.of(context).pop(false);
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true); // Return true when logout is confirmed
+                Navigator.of(context).pop(true);
               },
               child: Text('Logout'),
             ),
@@ -127,8 +127,7 @@ class _HomeState extends State<Home> {
 
     if (confirmLogout == true) {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('token'); // Remove token from SharedPreferences
-      // Navigate to login screen or any other desired screen
+      await prefs.remove('token');
       Navigator.pushReplacementNamed(context, '/login');
     }
   }
@@ -170,7 +169,7 @@ class _HomeState extends State<Home> {
             ),
             ListTile(
               title: Text('Logout'),
-              onTap: _logout, // Call logout function when tapped
+              onTap: _logout,
             ),
           ],
         ),
@@ -208,7 +207,7 @@ class _HomeState extends State<Home> {
                       ],
                     );
                   } else {
-                    return SizedBox.shrink(); // Hide the banner if no data is available
+                    return SizedBox.shrink();
                   }
                 },
               ),
@@ -236,7 +235,6 @@ class _HomeState extends State<Home> {
                         itemCount: myItems.length,
                         itemBuilder: (context, index) {
                           Item item = myItems[index];
-                          // Decode image data from base64 string
                           Uint8List? imageBytes = item.imageData != null
                               ? Uint8List.fromList(item.imageData!)
                               : null;
@@ -253,7 +251,7 @@ class _HomeState extends State<Home> {
                                     : SizedBox(
                                   width: 50,
                                   height: 50,
-                                  child: Placeholder(), // Placeholder if no image available
+                                  child: Placeholder(),
                                 ),
                                 onTap: () {
                                   Navigator.push(

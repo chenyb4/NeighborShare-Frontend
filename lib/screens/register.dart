@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:aad_hybrid/configs/colors.dart';
-
 import '../configs/backend_address.dart';
 
 class Register extends StatelessWidget {
@@ -24,40 +23,32 @@ class Register extends StatelessWidget {
       );
 
       if (response.statusCode == 201) {
-        // Registration successful
-        // You can navigate to another screen or show a success message
-        // Registration successful
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Registration successful!'),
-            duration: Duration(seconds: 2), // Adjust duration as needed
+            duration: Duration(seconds: 2),
           ),
         );
-        // Navigate to login screen after a short delay
+
         Future.delayed(Duration(seconds: 2), () {
           Navigator.pushReplacementNamed(context, '/login');
         });
       } else {
-        // Registration failed
-        // You can show an error message
-        // Registration failed
         final responseBody = jsonDecode(response.body);
         final errorMessage = responseBody['message'];
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Registration failed: $errorMessage'),
-            duration: Duration(seconds: 2), // Adjust duration as needed
+            duration: Duration(seconds: 2),
           ),
         );
       }
     } catch (e) {
-      // Handle any errors that occur during the process
-      // Handle any errors that occur during the process
       print('Error registering user: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('An error occurred. Please try again later.'),
-          duration: Duration(seconds: 2), // Adjust duration as needed
+          duration: Duration(seconds: 2),
         ),
       );
     }
@@ -100,7 +91,7 @@ class Register extends StatelessWidget {
             SizedBox(height: 50.0),
             ElevatedButton(
               onPressed: () {
-                registerUser(context); // Call the registerUser function
+                registerUser(context);
               },
               child: Text(
                 'Register',

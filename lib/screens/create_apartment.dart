@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
-import 'package:aad_hybrid/configs/backend_address.dart'; // Import backend address
-import 'package:aad_hybrid/screens/home.dart'; // Import home screen
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:aad_hybrid/configs/backend_address.dart';
+import 'package:aad_hybrid/screens/home.dart';
 
 class CreateApartment extends StatelessWidget {
   final TextEditingController _nameController = TextEditingController();
@@ -18,47 +18,42 @@ class CreateApartment extends StatelessWidget {
     final String name = _nameController.text.trim();
     final String pin = _pinController.text.trim();
 
-    final String? token = await _getToken(); // Retrieve token from SharedPreferences
+    final String? token = await _getToken();
 
     if (token == null) {
-      // Handle case where token is null (not logged in)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please log in to create an apartment'),
           backgroundColor: Colors.red,
         ),
       );
-      return; // Exit function early
+      return;
     }
 
     final response = await http.post(
       Uri.parse(baseUrl + '/apartments'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token', // Add authorization header with token
+        'Authorization': 'Bearer $token',
       },
       body: jsonEncode({'name': name, 'PIN': pin}),
     );
 
     if (response.statusCode == 200) {
-      // Apartment created successfully
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Apartment created successfully'),
           backgroundColor: Colors.green,
         ),
       );
-      // Clear text fields after creating the apartment
       _nameController.clear();
       _pinController.clear();
 
-      // Redirect to the home screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Home()),
       );
     } else {
-      // Failed to create apartment
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to create apartment'),
@@ -92,12 +87,12 @@ class CreateApartment extends StatelessWidget {
                 labelText: 'PIN Code',
               ),
               keyboardType: TextInputType.number,
-              maxLength: 6, // Limit input to 6 characters
+              maxLength: 6,
             ),
             SizedBox(height: 50.0),
             ElevatedButton(
               onPressed: () {
-                _createApartment(context); // Call create apartment function
+                _createApartment(context);
               },
               child: Text('Create Apartment'),
             ),

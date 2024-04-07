@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPreferences
-import 'package:aad_hybrid/configs/backend_address.dart'; // Import backend address
-import 'package:aad_hybrid/screens/home.dart';
-
-import '../configs/colors.dart'; // Import home screen
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:aad_hybrid/configs/backend_address.dart';
+import '../configs/colors.dart';
 
 class AddItem extends StatefulWidget {
   @override
@@ -19,7 +17,7 @@ class _AddItemState extends State<AddItem> {
 
   bool _isAvailable = true;
   late String _ownerEmail = '';
-  late String? _token; // Declare token variable
+  late String? _token;
 
   @override
   void initState() {
@@ -40,7 +38,7 @@ class _AddItemState extends State<AddItem> {
 
   Future<void> _fetchOwnerEmail() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString('token'); // Fetch token from SharedPreferences
+    _token = prefs.getString('token');
     if (_token != null) {
       Map<String, dynamic> payload = _parseJwt(_token!);
       setState(() {
@@ -64,38 +62,35 @@ class _AddItemState extends State<AddItem> {
       'description': _descriptionController.text,
       'apartmentNumber': _apartmentNumberController.text,
       'isAvailable': _isAvailable,
-      'ownerEmail': _ownerEmail, // Use the ownerEmail from token payload
+      'ownerEmail': _ownerEmail,
     };
 
     if (_token == null) {
-      // Handle case where token is null (not logged in)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please log in to add an item'),
           backgroundColor: Colors.red,
         ),
       );
-      return; // Exit function early
+      return;
     }
 
     final response = await http.post(
       Uri.parse(baseUrl + '/items/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $_token', // Add authorization header with token
+        'Authorization': 'Bearer $_token',
       },
       body: jsonEncode(itemData),
     );
 
     if (response.statusCode == 200) {
-      // Item added successfully
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Item added successfully'),
           backgroundColor: Colors.green,
         ),
       );
-      // Clear text fields after adding the item
       _partyNameController.clear();
       _descriptionController.clear();
       _apartmentNumberController.clear();
@@ -107,7 +102,6 @@ class _AddItemState extends State<AddItem> {
         Navigator.pushReplacementNamed(context, '/myItems');
       });
     } else {
-      // Item addition failed
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to add item'),
@@ -140,7 +134,7 @@ class _AddItemState extends State<AddItem> {
             SizedBox(height: 16),
             TextField(
               controller: _descriptionController,
-              maxLines: 5, // Larger text field for description
+              maxLines: 5,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Description',
@@ -173,12 +167,12 @@ class _AddItemState extends State<AddItem> {
             ElevatedButton(
               onPressed: _addItem,
               style: ElevatedButton.styleFrom(
-                primary: themeColorShade1, // Background color
-                elevation: 3, // Shadow elevation
+                primary: themeColorShade1,
+                elevation: 3,
               ),
               child: Text(
                 "Add Item",
-                style: TextStyle(color: Colors.white), // Text color
+                style: TextStyle(color: Colors.white),
               ),
             ),
           ],

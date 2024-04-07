@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:aad_hybrid/data/data.dart';
 import 'package:aad_hybrid/configs/backend_address.dart';
 import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
@@ -30,13 +29,12 @@ class _MyItemsState extends State<MyItems> {
   Future<void> fetchTokenAndItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
-    myEmail = getEmailFromToken(token); // Extract email from token
+    myEmail = getEmailFromToken(token);
     futureItems = fetchItems();
     setState(() {});
   }
 
   String getEmailFromToken(String token) {
-    // Decode the token
     List<String> parts = token.split('.');
     if (parts.length != 3) {
       throw Exception('Invalid token');
@@ -44,14 +42,13 @@ class _MyItemsState extends State<MyItems> {
     String payload = parts[1];
     String decodedPayload = utf8.decode(base64Url.decode(payload));
     Map<String, dynamic> decodedPayloadMap = json.decode(decodedPayload);
-    // Extract email from the decoded payload
     return decodedPayloadMap['email'];
   }
 
   Future<List<Item>> fetchItems() async {
     final response = await http.get(
       Uri.parse(baseUrl + '/items'),
-      headers: {'Authorization': 'Bearer $token'}, // Include authorization header
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
@@ -65,18 +62,17 @@ class _MyItemsState extends State<MyItems> {
 
   Future<void> _deleteItem(String itemId) async {
     if (token == null) {
-      // Handle case where token is null (not logged in)
       throw Exception('Token not found');
     }
 
     final response = await http.delete(
       Uri.parse(baseUrl + '/items/$itemId'),
-      headers: {'Authorization': 'Bearer $token'}, // Add authorization header with token
+      headers: {'Authorization': 'Bearer $token'},
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        futureItems = fetchItems(); // Refresh the list of items
+        futureItems = fetchItems();
       });
     } else {
       throw Exception('Failed to delete item');
@@ -85,11 +81,9 @@ class _MyItemsState extends State<MyItems> {
 
   Future<void> _toggleItemAvailability(Item item) async {
     if (token == null) {
-      // Handle case where token is null (not logged in)
       throw Exception('Token not found');
     }
 
-    // Create a map with only the fields to be updated
     Map<String, dynamic> updatedFields = {
       'isAvailable': !item.isAvailable,
     };
@@ -99,13 +93,12 @@ class _MyItemsState extends State<MyItems> {
       body: jsonEncode(updatedFields),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // Add authorization header with token
+        'Authorization': 'Bearer $token',
       },
     );
 
     if (response.statusCode == 200) {
       setState(() {
-        // Refresh the list of items
         futureItems = fetchItems();
       });
     } else {
@@ -116,7 +109,7 @@ class _MyItemsState extends State<MyItems> {
 
   Future<void> _refreshItems() async {
     setState(() {
-      futureItems = fetchItems(); // Refresh the list of items
+      futureItems = fetchItems();
     });
   }
 
@@ -139,7 +132,6 @@ class _MyItemsState extends State<MyItems> {
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else if (snapshot.hasData) {
-                // Filter items based on owner email
                 List<Item> myItems = snapshot.data!
                     .where((item) => item.ownerEmail == myEmail)
                     .toList();
@@ -147,13 +139,9 @@ class _MyItemsState extends State<MyItems> {
                   itemCount: myItems.length,
                   itemBuilder: (context, index) {
                     Item item = myItems[index];
-                    // Decode image data from base64 string
                     Uint8List? imageBytes = item.imageData != null
                         ? Uint8List.fromList(item.imageData!)
                         : null;
-
-
-
                     return Column(
                       children: [
                         ListTile(
@@ -200,7 +188,7 @@ class _MyItemsState extends State<MyItems> {
                               : SizedBox(
                             width: 50,
                             height: 50,
-                            child: Placeholder(), // Placeholder if no image available
+                            child: Placeholder(),
                           ),
                           tileColor: themeColorShade2,
                           trailing: Row(
@@ -209,14 +197,12 @@ class _MyItemsState extends State<MyItems> {
                               Switch(
                                 value: item.isAvailable,
                                 onChanged: (value) {
-                                  // Toggle item availability
                                   _toggleItemAvailability(item);
                                 },
                               ),
                               IconButton(
                                 icon: Icon(Icons.edit),
                                 onPressed: () {
-                                  // Navigate to edit item screen
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -225,7 +211,6 @@ class _MyItemsState extends State<MyItems> {
                                     ),
                                   ).then((value) {
                                     setState(() {
-                                      // Update state or call a function to refresh the screen
                                       futureItems = fetchItems();
                                     });
                                   });
@@ -234,7 +219,6 @@ class _MyItemsState extends State<MyItems> {
                               IconButton(
                                 icon: Icon(Icons.delete),
                                 onPressed: () {
-                                  // Show confirmation dialog before deleting the item
                                   showDialog(
                                     context: context,
                                     builder: (context) => AlertDialog(
@@ -244,14 +228,12 @@ class _MyItemsState extends State<MyItems> {
                                       actions: [
                                         TextButton(
                                           onPressed: () {
-                                            // Close the dialog
                                             Navigator.of(context).pop();
                                           },
                                           child: Text('No'),
                                         ),
                                         TextButton(
                                           onPressed: () {
-                                            // Delete the item and close the dialog
                                             _deleteItem(item.id);
                                             Navigator.of(context).pop();
                                           },
@@ -285,7 +267,6 @@ class _MyItemsState extends State<MyItems> {
         onPressed: () {
           Navigator.pushNamed(context, '/addItem').then((value) {
             setState(() {
-              // Update state or call a function to refresh the screen
               futureItems = fetchItems();
             });
           });
