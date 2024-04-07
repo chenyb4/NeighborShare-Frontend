@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart'; // Import SharedPre
 import 'package:aad_hybrid/configs/backend_address.dart'; // Import backend address
 import 'package:aad_hybrid/utils/helperFunctions.dart';
 
+import 'home.dart';
+
 
 
 class EnrolApartment extends StatefulWidget {
@@ -119,6 +121,12 @@ class _EnrolApartmentState extends State<EnrolApartment> {
                 content: Text('Enrolled successfully'),
                 backgroundColor: Colors.green,
               ),
+            );
+
+            // Navigate to Home screen
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => Home()),
             );
           } else {
             // Failed to enrol user
