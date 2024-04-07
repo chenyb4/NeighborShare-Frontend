@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aad_hybrid/configs/backend_address.dart';
 import '../configs/colors.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 
 class AddItem extends StatefulWidget {
   @override
@@ -14,7 +17,7 @@ class _AddItemState extends State<AddItem> {
   late TextEditingController _partyNameController;
   late TextEditingController _descriptionController;
   late TextEditingController _apartmentNumberController;
-
+  late File? _imageFile=null; // Added variable to hold the selected image file
   bool _isAvailable = true;
   late String _ownerEmail = '';
   late String? _token;
@@ -57,6 +60,30 @@ class _AddItemState extends State<AddItem> {
   }
 
   Future<void> _addItem() async {
+    // Ensure that all required fields are filled
+    if (_partyNameController.text.isEmpty ||
+        _descriptionController.text.isEmpty ||
+        _apartmentNumberController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all fields'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Ensure that an image is selected
+    if (_imageFile == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please select an image'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     final Map<String, dynamic> itemData = {
       'name': _partyNameController.text,
       'description': _descriptionController.text,
@@ -65,24 +92,24 @@ class _AddItemState extends State<AddItem> {
       'ownerEmail': _ownerEmail,
     };
 
-    if (_token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please log in to add an item'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+    // Create multipart request body
+    var request = http.MultipartRequest('POST', Uri.parse(baseUrl + '/items/'));
+    request.headers['Authorization'] = 'Bearer $_token';
 
-    final response = await http.post(
-      Uri.parse(baseUrl + '/items/'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $_token',
-      },
-      body: jsonEncode(itemData),
-    );
+    // Add item data fields
+    itemData.forEach((key, value) {
+      request.fields[key] = value.toString();
+    });
+
+    // Add image file
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      await _imageFile!.readAsBytes(),
+      filename: 'item_image.jpg',
+    ));
+
+    // Send request
+    var response = await request.send();
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -96,6 +123,7 @@ class _AddItemState extends State<AddItem> {
       _apartmentNumberController.clear();
       setState(() {
         _isAvailable = true;
+        _imageFile = null; // Clear selected image file
       });
 
       Future.delayed(Duration(milliseconds: 800), () {
@@ -108,6 +136,15 @@ class _AddItemState extends State<AddItem> {
           backgroundColor: Colors.red,
         ),
       );
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
     }
   }
 
@@ -124,6 +161,14 @@ class _AddItemState extends State<AddItem> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (_imageFile != null) // Display selected image if available
+              Image.file(_imageFile!),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: Text('Take Photo'), // Button to take photo
+            ),
+            SizedBox(height: 16),
             TextField(
               controller: _partyNameController,
               decoration: InputDecoration(
