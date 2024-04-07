@@ -29,6 +29,7 @@ class Login extends StatelessWidget {
       if (token != null) {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
+        await prefs.setString('email', email); // Save email to SharedPreferences
 
         final userDataResponse = await http.get(
           Uri.parse(baseUrl + '/users'),
