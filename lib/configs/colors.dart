@@ -2,6 +2,13 @@
 
 import 'package:flutter/material.dart';
 
-const themeColorShade1=Colors.orange;
+const themeColor=Colors.orange;
 
-const themeColorShade2=Colors.amberAccent;
+const listTileBackgroundColor=Colors.amberAccent;
+
+
+const addressBarBackgroundColor=Colors.deepPurpleAccent;
+
+const addressBarTextColor=Colors.white;
+
+//Color(0xffffebb2);

@@ -154,7 +154,7 @@ class _AddItemState extends State<AddItem> {
       appBar: AppBar(
         title: Text("Add an Item"),
         centerTitle: true,
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(32.0),
@@ -212,7 +212,7 @@ class _AddItemState extends State<AddItem> {
             ElevatedButton(
               onPressed: _addItem,
               style: ElevatedButton.styleFrom(
-                primary: themeColorShade1,
+                primary: themeColor,
                 elevation: 3,
               ),
               child: Text(

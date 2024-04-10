@@ -119,7 +119,7 @@ class _MyItemsState extends State<MyItems> {
       appBar: AppBar(
         title: const Text("My Items"),
         centerTitle: true,
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
       ),
       body: RefreshIndicator(
         onRefresh: _refreshItems,
@@ -190,7 +190,7 @@ class _MyItemsState extends State<MyItems> {
                             height: 50,
                             child: Placeholder(),
                           ),
-                          tileColor: themeColorShade2,
+                          tileColor: listTileBackgroundColor,
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -271,7 +271,7 @@ class _MyItemsState extends State<MyItems> {
             });
           });
         },
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
         child: Icon(Icons.add),
       ),
     );

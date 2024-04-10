@@ -59,7 +59,7 @@ class Register extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Register"),
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
         centerTitle: true,
       ),
       body: Padding(
@@ -98,7 +98,7 @@ class Register extends StatelessWidget {
                 style: TextStyle(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: themeColorShade1,
+                backgroundColor: themeColor,
               ),
             ),
           ],

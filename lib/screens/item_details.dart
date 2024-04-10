@@ -19,7 +19,7 @@ class ItemDetails extends StatelessWidget {
       appBar: AppBar(
         title: Text(item.name),
         centerTitle: true,
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -69,7 +69,7 @@ class ItemDetails extends StatelessWidget {
           value,
           style: TextStyle(
             fontSize: 18,
-            color: isLast ? themeColorShade1 : Colors.black,
+            color: isLast ? themeColor : Colors.black,
           ),
         ),
         if (!isLast) SizedBox(height: 10),

@@ -69,7 +69,7 @@ class Login extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("NeighborShare"),
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
         centerTitle: true,
       ),
       body: Padding(
@@ -109,7 +109,7 @@ class Login extends StatelessWidget {
                 style: TextStyle(color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: themeColorShade1,
+                backgroundColor: themeColor,
               ),
             ),
             SizedBox(height: 20.0),

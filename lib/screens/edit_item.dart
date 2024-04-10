@@ -38,7 +38,7 @@ class _EditItemState extends State<EditItem> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Item'),
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -91,7 +91,7 @@ class _EditItemState extends State<EditItem> {
                     style: TextStyle(color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
-                    primary: themeColorShade1,
+                    primary: themeColor,
                     elevation: 3,
                   ),
                 ),

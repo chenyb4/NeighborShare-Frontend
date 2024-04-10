@@ -136,9 +136,12 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("NeighborShare"),
+        title: const Text(
+            "NeighborShare",
+            style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
       ),
       drawer: Drawer(
         child: ListView(
@@ -146,7 +149,7 @@ class _HomeState extends State<Home> {
           children: [
             DrawerHeader(
               decoration: BoxDecoration(
-                color: themeColorShade1,
+                color: themeColor,
               ),
               child: Text(
                 'Menu',
@@ -179,7 +182,7 @@ class _HomeState extends State<Home> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: Colors.deepPurpleAccent,
+              color: addressBarBackgroundColor,
               padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: FutureBuilder<String>(
                 future: _fetchApartmentName(),
@@ -194,13 +197,13 @@ class _HomeState extends State<Home> {
                       children: [
                         Icon(
                           Icons.location_on,
-                          color: Colors.white,
+                          color: addressBarTextColor,
                         ),
                         SizedBox(width: 8.0),
                         Text(
                           '${snapshot.data}',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: addressBarTextColor,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -289,7 +292,7 @@ class _HomeState extends State<Home> {
                                     ),
                                   ],
                                 ),
-                                tileColor: themeColorShade2,
+                                tileColor: listTileBackgroundColor,
                               ),
                               const Divider(
                                 height: 1,
@@ -319,7 +322,7 @@ class _HomeState extends State<Home> {
             });
           });
         },
-        backgroundColor: themeColorShade1,
+        backgroundColor: themeColor,
         child: Icon(Icons.add),
       ),
     );
