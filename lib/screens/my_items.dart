@@ -1,14 +1,13 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:aad_hybrid/configs/backend_address.dart';
 import 'package:aad_hybrid/configs/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../components/my_item_list.dart';
 import '../models/Item.dart';
 import 'edit_item.dart';
-import 'item_details.dart';
+
 
 class MyItems extends StatefulWidget {
   @override
@@ -106,7 +105,6 @@ class _MyItemsState extends State<MyItems> {
     }
   }
 
-
   Future<void> _refreshItems() async {
     setState(() {
       futureItems = fetchItems();
@@ -135,125 +133,21 @@ class _MyItemsState extends State<MyItems> {
                 List<Item> myItems = snapshot.data!
                     .where((item) => item.ownerEmail == myEmail)
                     .toList();
-                return ListView.builder(
-                  itemCount: myItems.length,
-                  itemBuilder: (context, index) {
-                    Item item = myItems[index];
-                    Uint8List? imageBytes = item.imageData != null
-                        ? Uint8List.fromList(item.imageData!)
-                        : null;
-                    return Column(
-                      children: [
-                        ListTile(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ItemDetails(item: item),
-                              ),
-                            );
-                          },
-                          title: Text(
-                              item.name,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(item.description),
-                              Row(
-                                children: [
-                                  Icon(Icons.location_on),
-                                  Text(item.apartmentNumber),
-                                ],
-                              ),
-                              Text(
-                                item.isAvailable ? "Available" : "Unavailable",
-                                style: TextStyle(
-                                  color: item.isAvailable
-                                      ? Colors.green
-                                      : Colors.red,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          leading: imageBytes != null
-                              ? Image.memory(
-                            imageBytes,
-                            width: 50,
-                            height: 50,
-                            fit: BoxFit.cover,
-                          )
-                              : SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: Placeholder(),
-                          ),
-                          tileColor: listTileBackgroundColor,
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Switch(
-                                value: item.isAvailable,
-                                onChanged: (value) {
-                                  _toggleItemAvailability(item);
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.edit),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          EditItem(item: item),
-                                    ),
-                                  ).then((value) {
-                                    setState(() {
-                                      futureItems = fetchItems();
-                                    });
-                                  });
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                      title: Text('Confirm Deletion'),
-                                      content: Text(
-                                          'Are you sure you want to delete ${item.name}?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Text('No'),
-                                        ),
-                                        TextButton(
-                                          onPressed: () {
-                                            _deleteItem(item.id);
-                                            Navigator.of(context).pop();
-                                          },
-                                          child: Text('Yes'),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Divider(
-                          height: 1,
-                          thickness: 1,
-                          color: Colors.white,
-                        ),
-                      ],
-                    );
+                return MyItemList(
+                  items: myItems,
+                  onToggleAvailability: _toggleItemAvailability,
+                  onDeleteItem: _deleteItem,
+                  onEditItem: (item) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditItem(item: item),
+                      ),
+                    ).then((value) {
+                      setState(() {
+                        futureItems = fetchItems();
+                      });
+                    });
                   },
                 );
               } else {
