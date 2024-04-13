@@ -1,13 +1,14 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/Item.dart';
-import 'item_details.dart';
-import 'my_items.dart';
-import 'package:aad_hybrid/configs/colors.dart';
+import 'package:http/http.dart' as http;
 import 'package:aad_hybrid/configs/backend_address.dart';
+import 'package:aad_hybrid/models/Item.dart';
+import 'package:aad_hybrid/components/app_bar.dart';
+import 'package:aad_hybrid/components//drawer.dart';
+import 'package:aad_hybrid/components/address_bar.dart';
+import 'package:aad_hybrid/components/item_list.dart';
+import '../configs/colors.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -60,45 +61,38 @@ class _HomeState extends State<Home> {
   }
 
   Future<String> _fetchApartmentName() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String token = prefs.getString('token') ?? '';
-      Map<String, dynamic> payload = _parseJwt(token);
-      String userEmail = payload['email'] ?? '';
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token = prefs.getString('token') ?? '';
+    Map<String, dynamic> payload = _parseJwt(token);
+    String userEmail = payload['email'] ?? '';
 
-      final userResponse = await http.get(
-        Uri.parse(baseUrl + '/users?email=$userEmail'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+    final userResponse = await http.get(
+      Uri.parse(baseUrl + '/users?email=$userEmail'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
 
-      if (userResponse.statusCode == 200) {
-        List<dynamic> users = jsonDecode(userResponse.body);
-        if (users.isNotEmpty) {
-          dynamic apartmentId = users[0]['apartment_id'];
-          final apartmentResponse = await http.get(
-            Uri.parse(baseUrl + '/apartments/$apartmentId'),
-            headers: {'Authorization': 'Bearer $token'},
-          );
+    if (userResponse.statusCode == 200) {
+      List<dynamic> users = jsonDecode(userResponse.body);
+      if (users.isNotEmpty) {
+        dynamic apartmentId = users[0]['apartment_id'];
+        final apartmentResponse = await http.get(
+          Uri.parse(baseUrl + '/apartments/$apartmentId'),
+          headers: {'Authorization': 'Bearer $token'},
+        );
 
-          if (apartmentResponse.statusCode == 200) {
-            Map<String, dynamic> apartmentData = jsonDecode(apartmentResponse.body);
-            return apartmentData['name'] ?? 'Unknown Apartment';
-          } else {
-            throw Exception('Failed to load apartment');
-          }
+        if (apartmentResponse.statusCode == 200) {
+          Map<String, dynamic> apartmentData = jsonDecode(apartmentResponse.body);
+          return apartmentData['name'] ?? 'Unknown Apartment';
         } else {
-          throw Exception('User not found');
+          throw Exception('Failed to load apartment');
         }
       } else {
-        throw Exception('Failed to load user');
+        throw Exception('User not found');
       }
-    } catch (error) {
-      print('Error fetching apartment name: $error');
-      return 'Unknown Apartment';
+    } else {
+      throw Exception('Failed to load user');
     }
   }
-
-
 
   Future<void> _logout() async {
     bool confirmLogout = await showDialog(
@@ -135,86 +129,13 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-            "NeighborShare",
-            style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-        backgroundColor: themeColor,
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(
-                color: themeColor,
-              ),
-              child: Text(
-                'Menu',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
-              ),
-            ),
-            ListTile(
-              title: Text('My Items'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyItems(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
-              title: Text('Logout'),
-              onTap: _logout,
-            ),
-          ],
-        ),
-      ),
+      appBar: CustomAppBar(),
+      drawer: CustomDrawer(logoutCallback: _logout),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              color: addressBarBackgroundColor,
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: FutureBuilder<String>(
-                future: _fetchApartmentName(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          color: addressBarTextColor,
-                        ),
-                        SizedBox(width: 8.0),
-                        Text(
-                          '${snapshot.data}',
-                          style: TextStyle(
-                            color: addressBarTextColor,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-              ),
-            ),
+            AddressBar(addressFuture: _fetchApartmentName()),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: () {
@@ -223,97 +144,12 @@ class _HomeState extends State<Home> {
                   });
                   return futureItems;
                 },
-                child: FutureBuilder<List<Item>>(
-                  future: futureItems,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (snapshot.hasData) {
-                      List<Item> myItems = snapshot.data!
-                          .where((item) => item.ownerEmail != myEmail)
-                          .toList();
-                      return ListView.builder(
-                        itemCount: myItems.length,
-                        itemBuilder: (context, index) {
-                          Item item = myItems[index];
-                          Uint8List? imageBytes = item.imageData != null
-                              ? Uint8List.fromList(item.imageData!)
-                              : null;
-                          return Column(
-                            children: [
-                              ListTile(
-                                leading: imageBytes != null
-                                    ? Image.memory(
-                                  imageBytes,
-                                  width: 50,
-                                  height: 50,
-                                  fit: BoxFit.cover,
-                                )
-                                    : SizedBox(
-                                  width: 50,
-                                  height: 50,
-                                  child: Placeholder(),
-                                ),
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ItemDetails(item: item),
-                                    ),
-                                  );
-                                },
-                                title: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      item.name,
-                                      style: TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on),
-                                        Text(item.apartmentNumber),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(item.description),
-                                    Text(
-                                      item.isAvailable ? "Available" : "Unavailable",
-                                      style: TextStyle(
-                                        color: item.isAvailable ? Colors.green : Colors.red,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                tileColor: listTileBackgroundColor,
-                              ),
-                              const Divider(
-                                height: 1,
-                                thickness: 1,
-                                color: Colors.white,
-                              ),
-                            ],
-                          );
-                        },
-                      );
-                    } else {
-                      return Text('No data available');
-                    }
-                  },
-                ),
+                child: ItemList(itemFuture: futureItems, myEmail: myEmail),
               ),
             ),
           ],
         ),
       ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/addItem').then((value) {
