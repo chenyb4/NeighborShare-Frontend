@@ -4,6 +4,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:aad_hybrid/configs/backend_address.dart';
 import 'package:aad_hybrid/screens/home.dart';
+import '../components/apartment_form.dart';
+import '../components/create_ apartment_button.dart';
+
 
 class CreateApartment extends StatelessWidget {
   final TextEditingController _nameController = TextEditingController();
@@ -74,27 +77,15 @@ class CreateApartment extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: 'Apartment Name',
-              ),
+            ApartmentForm(
+              nameController: _nameController,
+              pinController: _pinController,
             ),
             SizedBox(height: 20.0),
-            TextField(
-              controller: _pinController,
-              decoration: InputDecoration(
-                labelText: 'PIN Code',
-              ),
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-            ),
-            SizedBox(height: 50.0),
-            ElevatedButton(
+            CreateApartmentButton(
               onPressed: () {
                 _createApartment(context);
               },
-              child: Text('Create Apartment'),
             ),
           ],
         ),
