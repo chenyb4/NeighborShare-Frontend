@@ -6,6 +6,12 @@ import 'package:aad_hybrid/configs/backend_address.dart';
 import '../configs/colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'dart:typed_data';
+import 'package:path_provider/path_provider.dart';
+
+
+
 
 
 class AddItem extends StatefulWidget {
@@ -142,11 +148,30 @@ class _AddItemState extends State<AddItem> {
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
     if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+      final File imageFile = File(pickedFile.path);
+      final Uint8List? compressedImageBytes = await FlutterImageCompress.compressWithFile(
+        imageFile.absolute.path,
+        minWidth: 100,
+        minHeight: 100,
+        quality: 80,
+      );
+      if (compressedImageBytes != null) {
+        final File tempFile = await _createTempFile(compressedImageBytes);
+        setState(() {
+          _imageFile = tempFile;
+        });
+      }
     }
   }
+
+
+  Future<File> _createTempFile(Uint8List compressedImageBytes) async {
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File('${tempDir.path}/temp_image.jpg');
+    await tempFile.writeAsBytes(compressedImageBytes);
+    return tempFile;
+  }
+
 
   @override
   Widget build(BuildContext context) {
