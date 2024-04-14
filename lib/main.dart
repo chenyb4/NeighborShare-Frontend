@@ -25,8 +25,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: FutureBuilder<bool>(
-        future: _hasApartment(),
+      home: token != null ? FutureBuilder<bool>(
+        future: _hasApartment(token!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
             return hasApartment ? Home() : EnrolOrCreate();
           }
         },
-      ),
+      ) : Login(),
       routes: {
         '/addItem': (context) => AddItem(),
         '/login': (context) => Login(),
@@ -46,9 +46,7 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Future<bool> _hasApartment() async {
-    if (token == null) return false;
-
+  Future<bool> _hasApartment(String token) async {
     try {
       final userDataResponse = await http.get(
         Uri.parse(baseUrl + '/users'),
@@ -58,7 +56,7 @@ class MyApp extends StatelessWidget {
       if (userDataResponse.statusCode == 200) {
         final userData = jsonDecode(userDataResponse.body);
         final user = userData.firstWhere(
-              (user) => user['email'] == _parseJwt(token!)['email'],
+              (user) => user['email'] == _parseJwt(token)['email'],
           orElse: () => null,
         );
         return user != null && user['apartment_id'] != null;
