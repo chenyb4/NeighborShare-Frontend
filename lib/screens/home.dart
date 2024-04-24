@@ -29,8 +29,7 @@ class _HomeState extends State<Home> {
   Future<void> fetchTokenAndItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
-    Map<String, dynamic> payload = _parseJwt(token);
-    myEmail = payload['email'] ?? '';
+    myEmail = prefs.getString('email') ?? '';
     futureItems = fetchItems();
     setState(() {});
   }
@@ -63,8 +62,7 @@ class _HomeState extends State<Home> {
   Future<String> _fetchApartmentName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String token = prefs.getString('token') ?? '';
-    Map<String, dynamic> payload = _parseJwt(token);
-    String userEmail = payload['email'] ?? '';
+    String userEmail = prefs.getString('email') ?? '';
 
     final userResponse = await http.get(
       Uri.parse(baseUrl + '/users?email=$userEmail'),

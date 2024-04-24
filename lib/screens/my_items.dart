@@ -28,7 +28,7 @@ class _MyItemsState extends State<MyItems> {
   Future<void> fetchTokenAndItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString('token') ?? '';
-    myEmail = getEmailFromToken(token);
+    myEmail = prefs.getString('email') ?? '';
     futureItems = fetchItems();
     setState(() {});
   }
